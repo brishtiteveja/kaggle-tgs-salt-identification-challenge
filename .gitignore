@@ -1,0 +1,9 @@
+#file
+.*
+*.log
+*.model
+*.h5
+
+#directory
+input
+code/.ipynb_checkpoints

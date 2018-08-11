@@ -1,0 +1,37 @@
+/apps/cent7/anaconda/5.1.0-py36/lib/python3.6/importlib/_bootstrap.py:219: RuntimeWarning: numpy.dtype size changed, may indicate binary incompatibility. Expected 96, got 88
+  return f(*args, **kwds)
+/apps/cent7/anaconda/5.1.0-py36/lib/python3.6/importlib/_bootstrap.py:219: RuntimeWarning: numpy.dtype size changed, may indicate binary incompatibility. Expected 96, got 88
+  return f(*args, **kwds)
+/apps/cent7/anaconda/5.1.0-py36/lib/python3.6/importlib/_bootstrap.py:219: RuntimeWarning: numpy.dtype size changed, may indicate binary incompatibility. Expected 96, got 88
+  return f(*args, **kwds)
+/apps/cent7/anaconda/5.1.0-py36/lib/python3.6/importlib/_bootstrap.py:219: RuntimeWarning: numpy.dtype size changed, may indicate binary incompatibility. Expected 96, got 88
+  return f(*args, **kwds)
+/apps/cent7/anaconda/5.1.0-py36/lib/python3.6/importlib/_bootstrap.py:219: RuntimeWarning: numpy.dtype size changed, may indicate binary incompatibility. Expected 96, got 88
+  return f(*args, **kwds)
+/apps/cent7/anaconda/5.1.0-py36/lib/python3.6/importlib/_bootstrap.py:219: RuntimeWarning: numpy.dtype size changed, may indicate binary incompatibility
+  return f(*args, **kwds)
+Using TensorFlow backend.
+/home/azehady/.local/lib/python3.6/site-packages/keras_preprocessing/image.py:489: UserWarning: grayscale is deprecated. Please use color_mode = "grayscale"
+  warnings.warn('grayscale is deprecated. Please use '
+HBox(children=(IntProgress(value=0, max=4000), HTML(value='')))
+
+HBox(children=(IntProgress(value=0, max=4000), HTML(value='')))
+
+Traceback (most recent call last):
+  File "kernel.py", line 182, in <module>
+    fig, axs = plt.subplots(1, 2, figsize=(15,5))
+  File "/apps/cent7/anaconda/5.1.0-py36/lib/python3.6/site-packages/matplotlib/pyplot.py", line 1176, in subplots
+    fig = figure(**fig_kw)
+  File "/apps/cent7/anaconda/5.1.0-py36/lib/python3.6/site-packages/matplotlib/pyplot.py", line 539, in figure
+    **kwargs)
+  File "/apps/cent7/anaconda/5.1.0-py36/lib/python3.6/site-packages/matplotlib/backend_bases.py", line 171, in new_figure_manager
+    return cls.new_figure_manager_given_figure(num, fig)
+  File "/apps/cent7/anaconda/5.1.0-py36/lib/python3.6/site-packages/matplotlib/backend_bases.py", line 177, in new_figure_manager_given_figure
+    canvas = cls.FigureCanvas(figure)
+  File "/apps/cent7/anaconda/5.1.0-py36/lib/python3.6/site-packages/matplotlib/backends/backend_qt5agg.py", line 35, in __init__
+    super(FigureCanvasQTAggBase, self).__init__(figure=figure)
+  File "/apps/cent7/anaconda/5.1.0-py36/lib/python3.6/site-packages/matplotlib/backends/backend_qt5.py", line 235, in __init__
+    _create_qApp()
+  File "/apps/cent7/anaconda/5.1.0-py36/lib/python3.6/site-packages/matplotlib/backends/backend_qt5.py", line 122, in _create_qApp
+    raise RuntimeError('Invalid DISPLAY variable')
+RuntimeError: Invalid DISPLAY variable
