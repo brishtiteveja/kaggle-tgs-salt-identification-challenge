@@ -3,6 +3,7 @@
 *.log
 *.model
 *.h5
+*.svg
 
 #directory
 input
