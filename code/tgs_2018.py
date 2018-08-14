@@ -1,13 +1,13 @@
 
 # coding: utf-8
 
-# In[97]:
+# In[98]:
 
 
 # Links and codes
-#http://blog.kaggle.com/2017/12/22/carvana-image-masking-first-place-interview/
+# http://blog.kaggle.com/2017/12/22/carvana-image-masking-first-place-interview/
 # 1st place solution
-#https://github.com/asanakoy/kaggle_carvana_segmentation
+# https://github.com/asanakoy/kaggle_carvana_segmentation
 
 # 2018 nuclei data science bowl
 # https://www.kaggle.com/c/data-science-bowl-2018/data
@@ -19,16 +19,16 @@
 # deeplab v3
 # https://github.com/sthalles/deeplab_v3
 # https://github.com/bonlime/keras-deeplab-v3-plus
-#https://github.com/handong1587/handong1587.github.io/blob/master/_posts/deep_learning/2015-10-09-segmentation.md
+# https://github.com/handong1587/handong1587.github.io/blob/master/_posts/deep_learning/2015-10-09-segmentation.md
 
-#topcoders, 1st place solution
-#https://www.kaggle.com/c/data-science-bowl-2018/discussion/54741
+# topcoders, 1st place solution
+# https://www.kaggle.com/c/data-science-bowl-2018/discussion/54741
 # Torch solution: https://github.com/neptune-ml/open-solution-data-science-bowl-2018
 
 # 5th place keras solution (mask rcnn)
-#https://github.com/mirzaevinom/data_science_bowl_2018/blob/master/codes/model.py
+# https://github.com/mirzaevinom/data_science_bowl_2018/blob/master/codes/model.py
 
-#http://blog.kaggle.com/2017/06/29/2017-data-science-bowl-predicting-lung-cancer-2nd-place-solution-write-up-daniel-hammack-and-julian-de-wit/
+# http://blog.kaggle.com/2017/06/29/2017-data-science-bowl-predicting-lung-cancer-2nd-place-solution-write-up-daniel-hammack-and-julian-de-wit/
 
 # Cardiac MRI segmentation
 # Use the different models and see
@@ -37,12 +37,12 @@
 # 2017 national data science bowl
 # https://www.kaggle.com/c/data-science-bowl-2017#description
 # 2nd place solution for the 2017 national datascience bowl
-#http://juliandewit.github.io/kaggle-ndsb2017/
+# http://juliandewit.github.io/kaggle-ndsb2017/
 # Top 2017 algo
 # https://datasciencebowl.com/2017algorithms/
 
 # Read lung segmentation blog
-#http://blog.kaggle.com/2017/05/16/data-science-bowl-2017-predicting-lung-cancer-solution-write-up-team-deep-breath/
+# http://blog.kaggle.com/2017/05/16/data-science-bowl-2017-predicting-lung-cancer-solution-write-up-team-deep-breath/
 
 
 # # Changelog
@@ -64,20 +64,11 @@
 # - Added augmentation by flipping the images along the y axes (thanks to the forum for clarification).
 # - Added dropout to the model which seems to improve performance.
 
-# In[98]:
-
-
-from IPython import get_ipython
-
-ip = get_ipython()
-
-if ip == None:
-    print('Python Script from notebook is running.')
-else:
-    print('Notebook is running.')
-
-
 # In[99]:
+
+
+
+# In[78]:
 
 
 import numpy as np
@@ -95,7 +86,7 @@ from sklearn.model_selection import train_test_split
 
 from skimage.transform import resize
 
-from keras.preprocessing.image import load_img
+from keras.preprocessing.image import load_img, img_to_array, array_to_img
 from keras import Model
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from keras.models import load_model
@@ -106,10 +97,25 @@ from keras.layers import Input, Conv2D, Conv2DTranspose, MaxPooling2D, concatena
 
 from tqdm import tqdm_notebook
 
+# Hide warnings
+import warnings
+warnings.filterwarnings('ignore')
+#warnings.filterwarnings(action='once')
+
+from IPython import get_ipython
+
+ip = get_ipython()
+
+if ip == None:
+    print('Python Script from notebook is running.')
+    plt.switch_backend('agg')
+else:
+    print('Notebook is running.')
+
 
 # # Params and helpers
 
-# In[101]:
+# In[79]:
 
 
 img_size_ori = 101
@@ -133,7 +139,7 @@ def downsample(img):
 # # Loading of training/testing ids and depths
 # Reading the training data and the depths, store them in a DataFrame. Also create a test DataFrame with entries from depth not in train.
 
-# In[102]:
+# In[80]:
 
 
 dataset_path = "" #"tgs-salt-identification-challenge/"
@@ -146,13 +152,13 @@ test_df = depths_df[~depths_df.index.isin(train_df.index)]
 # # Read images and masks
 # Load the images and masks into the DataFrame and divide the pixel values by 255.
 
-# In[103]:
+# In[81]:
 
 
 train_df["images"] = [np.array(load_img("../input/" + dataset_path + "train/images/{}.png".format(idx), grayscale=True)) / 255 for idx in tqdm_notebook(train_df.index)]
 
 
-# In[104]:
+# In[82]:
 
 
 train_df["masks"] = [np.array(load_img("../input/" + dataset_path + "train/masks/{}.png".format(idx), grayscale=True)) / 255 for idx in tqdm_notebook(train_df.index)]
@@ -162,19 +168,19 @@ train_df["masks"] = [np.array(load_img("../input/" + dataset_path + "train/masks
 # Counting the number of salt pixels in the masks and dividing them by the image size. Also create 11 coverage classes, -0.1 having no salt at all to 1.0 being salt only.
 # Plotting the distribution of coverages and coverage classes, and the class against the raw coverage.
 
-# In[105]:
+# In[83]:
 
 
 train_df["coverage"] = train_df.masks.map(np.sum) / pow(img_size_ori, 2)
 
 
-# In[106]:
+# In[84]:
 
 
 train_df.head()
 
 
-# In[116]:
+# In[85]:
 
 
 def cov_to_class(val):    
@@ -185,13 +191,13 @@ def cov_to_class(val):
 train_df["coverage_class"] = train_df.coverage.map(cov_to_class)
 
 
-# In[117]:
+# In[86]:
 
 
 train_df.head()
 
 
-# In[118]:
+# In[87]:
 
 
 fig, axs = plt.subplots(1, 2, figsize=(15,5))
@@ -201,8 +207,13 @@ plt.suptitle("Salt coverage")
 axs[0].set_xlabel("Coverage")
 axs[1].set_xlabel("Coverage class")
 
+if ip != None:
+    plt.show()
+else:
+    plt.savefig(open('../images/salt_coverage.svg','wb'), dpi=150)
 
-# In[119]:
+
+# In[88]:
 
 
 plt.scatter(train_df.coverage, train_df.coverage_class)
@@ -218,7 +229,7 @@ else:
 # # Plotting the depth distributions
 # Separatelty plotting the depth distributions for the training and the testing data.
 
-# In[120]:
+# In[44]:
 
 
 sns.distplot(train_df.z, label="Train")
@@ -229,12 +240,12 @@ plt.title("Depth distribution")
 if ip != None:
     plt.show()
 else:
-    plt.savefig(open('depth_distribution.svg', 'wb'), dpi=150)
+    plt.savefig(open('../images/depth_distribution.svg', 'wb'), dpi=150)
 
 
 # # Show some example images
 
-# In[123]:
+# In[37]:
 
 
 max_images = 60
@@ -257,13 +268,13 @@ plt.suptitle("Green: salt. Top-left: coverage class, top-right: salt coverage, b
 if ip != None:
     plt.show()
 else:
-    plt.savefig(open('salt_coverage.svg', 'wb'), dpi=150)
+    plt.savefig(open('../images/salt_coverage.svg', 'wb'), dpi=150)
 
 
 # # Create train/validation split stratified by salt coverage
 # Using the salt coverage as a stratification criterion. Also show an image to check for correct upsampling.
 
-# In[ ]:
+# In[45]:
 
 
 import copy
@@ -276,7 +287,14 @@ train_df = train_df_salt = train_df[train_df.coverage == 0]
 train_df_nosalt = train_df[train_df.coverage != 0]
 
 
-# In[124]:
+# In[46]:
+
+
+print(train_df_orig.describe())
+print(train_df.describe())
+
+
+# In[48]:
 
 
 ids_train, ids_valid, x_train, x_valid, y_train, y_valid, cov_train, cov_test, depth_train, depth_test = train_test_split(
@@ -288,7 +306,7 @@ ids_train, ids_valid, x_train, x_valid, y_train, y_valid, cov_train, cov_test, d
     test_size=0.25, stratify=train_df.coverage_class, random_state=1337)
 
 
-# In[125]:
+# In[49]:
 
 
 tmp_img = np.zeros((img_size_target, img_size_target), dtype=train_df.images.loc[ids_train[10]].dtype)
@@ -302,12 +320,12 @@ axs[1].set_title("Scaled image")
 if ip != None:
     plt.show()
 else:
-    plt.savefig(open('scaled_original.svg', 'wb'), dpi=150)
+    plt.savefig(open('../images/scaled_original.svg', 'wb'), dpi=150)
 
 
 # # Build model
 
-# In[126]:
+# In[50]:
 
 
 def build_model(input_layer, start_neurons):
@@ -376,19 +394,19 @@ input_layer = Input((img_size_target, img_size_target, 1))
 output_layer = build_model(input_layer, 16)
 
 
-# In[127]:
+# In[51]:
 
 
 model = Model(input_layer, output_layer)
 
 
-# In[128]:
+# In[52]:
 
 
 model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
 
 
-# In[129]:
+# In[53]:
 
 
 model.summary()
@@ -396,7 +414,7 @@ model.summary()
 
 # # Data augmentation
 
-# In[130]:
+# In[54]:
 
 
 from itertools import product, chain
@@ -404,7 +422,7 @@ import imgaug as ia
 from imgaug import augmenters as iaa
 
 
-# In[131]:
+# In[55]:
 
 
 def relabel(img):
@@ -444,7 +462,7 @@ def get_crop_pad_sequence(vertical, horizontal):
     return (top, right, bottom, left)
 
 
-# In[132]:
+# In[56]:
 
 
 def _perspective_transform_augment_images(self, images, random_state, parents, hooks):
@@ -645,7 +663,7 @@ def pad_to_fit_net(divisor, pad_mode, rest_of_augs=iaa.Noop()):
     return iaa.Sequential(InferencePad(divisor, pad_mode), rest_of_augs)
 
 
-# In[133]:
+# In[57]:
 
 
 # Link: https://gist.github.com/oeway/2e3b989e0343f0884388ed7ed82eb3b0
@@ -1021,7 +1039,7 @@ class EnhancedCompose(object):
         return img
 
 
-# In[134]:
+# In[59]:
 
 
 from torchvision.transforms import Lambda
@@ -1117,7 +1135,7 @@ axs[0][6].imshow(img_cr, cmap='gray')
 axs[1][6].imshow(y_cr, cmap='gray')
 
 
-# In[136]:
+# In[60]:
 
 
 ids_train, ids_valid, x_train, x_valid, y_train, y_valid, cov_train, cov_test, depth_train, depth_test = train_test_split(
@@ -1128,8 +1146,12 @@ ids_train, ids_valid, x_train, x_valid, y_train, y_valid, cov_train, cov_test, d
     train_df.z.values,
     test_size=0.25, stratify=train_df.coverage_class, random_state=1337)
 
+
+# In[61]:
+
+
 #For small dataset
-#sn = 500
+#sn = 150
 #ids_train = ids_train[0:sn]
 #ids_valid = ids_valid[0:sn]
 #x_train = x_train[0:sn]
@@ -1140,12 +1162,12 @@ ids_train, ids_valid, x_train, x_valid, y_train, y_valid, cov_train, cov_test, d
 #cov_test = cov_test[0:sn]
 #depth_train = depth_train[0:sn]
 #depth_test = depth_test[0:sn]
-#
+
 #x_train_tmp = np.copy(x_train)
 #y_train_tmp = np.copy(y_train)
 
 
-# In[67]:
+# In[31]:
 
 
 # # Data Augmentation
@@ -1334,24 +1356,31 @@ ids_train, ids_valid, x_train, x_valid, y_train, y_valid, cov_train, cov_test, d
 #    plt.savefig(open('../images/augmented_data.svg', 'wb'), dpi = 150)
 
 
+# In[64]:
+
+
+# Check whether salt only train df or not (< 4000)
+len(train_df)
+
+
 # # Training
 
-# In[152]:
+# In[65]:
 
 
-model_file_ini = "./keras-augment-20-coverage-class-salt-only-train-image-11Aug2018"
+model_file_ini = "./keras-augment-20-coverage-class-salt-only-train-image-12Aug2018"
 model_file_name = model_file_ini + ".model"
 submission_file_name = model_file_ini + "-submission.csv"
 
 
-# In[137]:
+# In[66]:
 
 
 early_stopping = EarlyStopping(patience=10, verbose=1)
 model_checkpoint = ModelCheckpoint(model_file_name, save_best_only=True, verbose=1)
 reduce_lr = ReduceLROnPlateau(factor=0.1, patience=5, min_lr=0.00001, verbose=1)
 
-epochs = 5#200 
+epochs = 200
 batch_size = 32
 
 history = model.fit(x_train, y_train,
@@ -1361,7 +1390,7 @@ history = model.fit(x_train, y_train,
                     callbacks=[early_stopping, model_checkpoint, reduce_lr])
 
 
-# In[138]:
+# In[35]:
 
 
 fig, (ax_loss, ax_acc) = plt.subplots(1, 2, figsize=(15,5))
@@ -1372,8 +1401,13 @@ ax_acc.plot(history.epoch, history.history["acc"], label="Train accuracy")
 ax_acc.plot(history.epoch, history.history["val_acc"], label="Validation accuracy")
 ax_acc.legend()
 
+if ip != None:
+    plt.show()
+else:
+    plt.savefig(open('../images/val_train_loss_acc_curve.svg', 'wb'), dpi=150)
 
-# In[142]:
+
+# In[100]:
 
 
 import os
@@ -1393,7 +1427,7 @@ else:
 # # Predict the validation set to do a sanity check
 # Again plot some sample images including the predictions.
 
-# In[143]:
+# In[101]:
 
 
 preds_valid = model.predict(x_valid).reshape(-1, img_size_target, img_size_target)
@@ -1401,33 +1435,36 @@ preds_valid = np.array([downsample(x) for x in preds_valid])
 y_valid_ori = np.array([train_df.loc[idx].masks for idx in ids_valid])
 
 
-# In[144]:
+# In[123]:
 
 
-max_images = 60
+max_images = 10
 grid_width = 15
 grid_height = int(max_images / grid_width)
-fig, axs = plt.subplots(grid_height, grid_width, figsize=(grid_width, grid_height))
 for i, idx in enumerate(ids_valid[:max_images]):
     img = train_df.loc[idx].images
     mask = train_df.loc[idx].masks
     pred = preds_valid[i]
-    ax = axs[int(i / grid_width), i % grid_width]
-    ax.imshow(img, cmap="Greys")
-    ax.imshow(mask, alpha=0.3, cmap="Greens")
-    ax.imshow(pred, alpha=0.3, cmap="OrRd")
-    ax.text(1, img_size_ori-1, train_df.loc[idx].z, color="black")
-    ax.text(img_size_ori - 1, 1, round(train_df.loc[idx].coverage, 2), color="black", ha="right", va="top")
-    ax.text(1, 1, train_df.loc[idx].coverage_class, color="black", ha="left", va="top")
-    ax.set_yticklabels([])
-    ax.set_xticklabels([])
-plt.suptitle("Green: salt, Red: prediction. Top-left: coverage class, top-right: salt coverage, bottom-left: depth")
+    
+    fig, ax = plt.subplots(1, 3, figsize=(15, 15))
+    ax[0].imshow(img, cmap="gray")
+    ax[1].imshow(mask, cmap="gray")
+    ax[2].imshow(pred, cmap="gray")
+    plt.show()
+
+
+
+if ip != None:
+    plt.show()
+else:
+    plt.savefig(open('../images/train_valid_img_pred_test_img_' + str(i) + '.svg', 'wb'), dpi=150)
+        
 
 
 # # Scoring
 # Score the model and do a threshold optimization by the best IoU.
 
-# In[145]:
+# In[39]:
 
 
 # src: https://www.kaggle.com/aglotero/another-iou-metric
@@ -1493,14 +1530,14 @@ def iou_metric_batch(y_true_in, y_pred_in):
     return np.mean(metric)
 
 
-# In[146]:
+# In[41]:
 
 
-thresholds = np.linspace(0, 1, 2)
+thresholds = np.linspace(0, 1, 50)
 ious = np.array([iou_metric_batch(y_valid_ori, np.int32(preds_valid > threshold)) for threshold in tqdm_notebook(thresholds)])
 
 
-# In[147]:
+# In[42]:
 
 
 threshold_best_index = np.argmax(ious[9:-10]) + 9
@@ -1508,7 +1545,7 @@ iou_best = ious[threshold_best_index]
 threshold_best = thresholds[threshold_best_index]
 
 
-# In[148]:
+# In[43]:
 
 
 plt.plot(thresholds, ious)
@@ -1518,11 +1555,16 @@ plt.ylabel("IoU")
 plt.title("Threshold vs IoU ({}, {})".format(threshold_best, iou_best))
 plt.legend()
 
+if ip!= None:
+    plt.show()
+else:
+    plt.savefig(open('../images/threshold_vs_iou.svg', 'wb'), dpi=150)
+
 
 # # Another sanity check with adjusted threshold
 # Again some sample images with the adjusted threshold.
 
-# In[149]:
+# In[44]:
 
 
 max_images = 60
@@ -1544,11 +1586,16 @@ for i, idx in enumerate(ids_valid[:max_images]):
     ax.set_xticklabels([])
 plt.suptitle("Green: salt, Red: prediction. Top-left: coverage class, top-right: salt coverage, bottom-left: depth")
 
+if ip != None:
+    plt.show()
+else:
+    plt.savefig(open('threshold_sanity_check.svg', 'wb'), dpi=150)
+
 
 # # Submission
 # Load, predict and submit the test image predictions.
 
-# In[150]:
+# In[45]:
 
 
 # Source https://www.kaggle.com/bguberfain/unet-with-depth
@@ -1590,29 +1637,39 @@ def RLenc(img, order='F', format=True):
         return runs
 
 
-# In[151]:
+# In[1]:
 
 
 x_test = np.array([upsample(np.array(load_img("../input/" + dataset_path + "test/images/{}.png".format(idx), grayscale=True))) / 255 for idx in tqdm_notebook(test_df.index)]).reshape(-1, img_size_target, img_size_target, 1)
 
 
-# In[ ]:
+# In[47]:
 
 
 preds_test = model.predict(x_test)
 
 
-# In[ ]:
+# In[48]:
 
 
 pred_dict = {idx: RLenc(np.round(downsample(preds_test[i]) > threshold_best)) for i, idx in enumerate(tqdm_notebook(test_df.index.values))}
 
 
-# In[ ]:
+# In[49]:
 
 
 sub = pd.DataFrame.from_dict(pred_dict,orient='index')
 sub.index.names = ['id']
 sub.columns = ['rle_mask']
 sub.to_csv(submission_file_name)
+
+
+# In[72]:
+
+
+tL = len(x_test)
+idx = random.randint(0, tL)
+
+x = x_test[idx]
+cv.imshow('img', x)
 
